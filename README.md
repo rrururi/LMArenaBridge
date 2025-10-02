@@ -4,6 +4,26 @@ Welcome to the next generation of LMArena Bridge! 🎉 This is a high-performanc
 
 This refactored version aims to provide a more stable, maintainable, and extensible experience.
 
+## 📖 Table of Contents
+
+- [Key Features](#-key-features)
+- [Quick Start](#-installation-and-usage)
+- [Configuration Guide](#️-configuration-file-description)
+- [File Hosting Server](#-new-file-hosting-server)
+- [How It Works](#-how-does-it-work)
+- [Additional Documentation](#-additional-documentation)
+- [Environment Variables](#-environment-variables-for-deployment)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+## 📚 Additional Documentation
+
+- **[Dashboard Guide](DASHBOARD_README.md)** - Complete guide for the web dashboard
+- **[Dashboard Token System](DASHBOARD_TOKEN_INTEGRATION.md)** - Token management and authentication
+- **[Quick Start Dashboard](QUICK_START_DASHBOARD.md)** - Get started with the dashboard quickly
+- **[Cloud Deployment](docs/CLOUD_DEPLOYMENT.md)** - Deploy to cloud platforms (Coming Soon)
+- **[Worker Configuration](worker_config.jsonc)** - Configure cloud workers
+
 ## ✨ Key Features
 
 *   **🚀 High-Performance Backend**: Built on **FastAPI** and **Uvicorn**, providing asynchronous, high-performance API services.

@@ -85,5 +85,55 @@
   // 设置一个 API Key 来保护您的服务。
   // 如果设置了此值，所有到 /v1/chat/completions 的请求都必须在 Authorization 头部中包含正确的 Bearer Token。
   // 注意：如果 use_dashboard_tokens 为 true，系统将优先使用 dashboard tokens，此 API Key 将作为备用选项。
-  "api_key": ""
+  "api_key": "",
+
+  // --- 云部署设置 (Cloud Deployment) ---
+
+  // 部署模式
+  // "local": 传统单机模式，WebSocket 仅监听 localhost
+  // "cloud": 云部署模式，允许远程 worker 连接
+  "deployment_mode": "local",
+
+  // Worker 设置
+  "worker_settings": {
+    // 是否需要 worker 认证
+    "require_authentication": true,
+    
+    // 心跳间隔（秒）
+    // Worker 应该在此间隔内发送心跳信号
+    "heartbeat_interval_seconds": 30,
+    
+    // 最大 worker 数量
+    "max_workers": 10,
+    
+    // Worker 超时时间（秒）
+    // 如果 worker 在此时间内未发送心跳，将被视为不健康
+    "worker_timeout_seconds": 120,
+    
+    // 有效的 worker 认证令牌列表
+    // 在云部署模式下，worker 必须使用这些令牌之一进行认证
+    // 示例: ["token-abc-123", "token-def-456"]
+    "valid_tokens": []
+  },
+
+  // 请求队列设置
+  "queue_settings": {
+    // 请求在队列中的最大等待时间（秒）
+    "max_wait_seconds": 60,
+    
+    // 当没有可用 worker 时是否立即拒绝请求
+    // true: 立即返回 503 错误
+    // false: 将请求加入队列等待
+    "reject_when_no_workers": true
+  },
+
+  // 云服务器设置（仅在 deployment_mode 为 "cloud" 时使用）
+  "cloud_settings": {
+    // 公开的 WebSocket URL (wss://)
+    // Worker 将连接到此地址
+    "public_ws_url": "wss://your-app.render.com/ws/worker",
+    
+    // CORS 允许的来源
+    "cors_allowed_origins": ["*"]
+  }
 }

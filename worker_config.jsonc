@@ -1,0 +1,59 @@
+{
+  // Worker Configuration File
+  // This file is used by local devices running browsers to connect as workers
+  // to the cloud-deployed LMArena Bridge server.
+
+  // --- Worker Identity ---
+  
+  // Unique identifier for this worker
+  // Change this if you're running multiple workers
+  "worker_id": "worker-001",
+  
+  // Authentication token for this worker
+  // Must match one of the tokens in the cloud server's config.jsonc
+  // under worker_settings.valid_tokens
+  "worker_auth_token": "your-worker-token-here",
+
+  // --- Cloud Server Connection ---
+  
+  // Cloud server WebSocket URL
+  // Replace with your actual Render.com (or other cloud provider) URL
+  // Use wss:// for secure connections (recommended for production)
+  "cloud_server_url": "wss://your-app.render.com/ws/worker",
+  
+  // Auto-reconnect on disconnect
+  "auto_reconnect": true,
+  
+  // Delay before attempting to reconnect (seconds)
+  "reconnect_delay_seconds": 5,
+  
+  // Maximum reconnection attempts (0 = unlimited)
+  "max_reconnect_attempts": 0,
+
+  // --- Worker Behavior ---
+  
+  // Send heartbeat to cloud server (keeps connection alive)
+  "send_heartbeat": true,
+  
+  // Heartbeat interval (seconds)
+  // Should match or be less than the server's heartbeat_interval_seconds
+  "heartbeat_interval_seconds": 30,
+
+  // --- LMArena Session Settings ---
+  
+  // These are the same session settings as in config.jsonc
+  // They are specific to THIS worker's LMArena session
+  
+  "session_id": "YOUR_SESSION_ID_HERE",
+  "message_id": "YOUR_MESSAGE_ID_HERE",
+  "id_updater_last_mode": "direct_chat",
+  "id_updater_battle_target": "A",
+
+  // --- Local Settings ---
+  
+  // Enable local logging
+  "enable_logging": true,
+  
+  // Log level: "DEBUG", "INFO", "WARNING", "ERROR"
+  "log_level": "INFO"
+}

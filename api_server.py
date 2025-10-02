@@ -26,6 +26,8 @@ from fastapi.responses import StreamingResponse, JSONResponse, Response
 # --- 内部模块导入 ---
 from modules.file_uploader import upload_to_file_bed
 from modules import dashboard_db as db
+from modules.worker_manager import WorkerManager
+from modules.request_queue import RequestQueue
 
 
 # --- 基础配置 ---

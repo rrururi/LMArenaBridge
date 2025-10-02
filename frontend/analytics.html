@@ -70,20 +70,26 @@
             <!-- Daily Requests Chart -->
             <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Daily Requests</h3>
-                <canvas id="dailyChart" height="250"></canvas>
+                <div class="chart-container" style="position: relative; height: 280px; max-height: 280px;">
+                    <canvas id="dailyChart"></canvas>
+                </div>
             </div>
 
             <!-- Model Usage Chart -->
             <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Requests by Model</h3>
-                <canvas id="modelChart" height="250"></canvas>
+                <div class="chart-container" style="position: relative; height: 280px; max-height: 280px;">
+                    <canvas id="modelChart"></canvas>
+                </div>
             </div>
         </div>
 
         <!-- Response Time Chart -->
         <div class="bg-white rounded-lg shadow p-6 mb-8">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Average Response Time Trend</h3>
-            <canvas id="responseTimeChart" height="150"></canvas>
+            <div class="chart-container" style="position: relative; height: 200px; max-height: 200px;">
+                <canvas id="responseTimeChart"></canvas>
+            </div>
         </div>
 
         <!-- Detailed Logs Table -->

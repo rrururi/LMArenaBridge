@@ -106,13 +106,17 @@
             <!-- Requests Chart -->
             <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Requests Over Time (Last 7 Days)</h3>
-                <canvas id="requestsChart" height="200"></canvas>
+                <div class="chart-container" style="position: relative; height: 250px; max-height: 250px;">
+                    <canvas id="requestsChart"></canvas>
+                </div>
             </div>
 
             <!-- Models Chart -->
             <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Models Used</h3>
-                <canvas id="modelsChart" height="200"></canvas>
+                <div class="chart-container" style="position: relative; height: 250px; max-height: 250px;">
+                    <canvas id="modelsChart"></canvas>
+                </div>
             </div>
         </div>
 

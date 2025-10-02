@@ -12,6 +12,7 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 import uvicorn
 import logging
+import os
 from datetime import datetime
 
 from modules import dashboard_db as db
@@ -282,9 +283,49 @@ async def create_first_admin(user: UserCreate):
     logger.info(f"First admin user created: {user.username}")
     return {"message": "Admin user created successfully", "user_id": user_id}
 
+def create_admin_from_env():
+    """
+    Create admin user from environment variables if they exist.
+    Useful for initial setup in containerized/cloud environments.
+    
+    Environment variables:
+    - ADMIN_USERNAME
+    - ADMIN_EMAIL
+    - ADMIN_PASSWORD
+    """
+    admin_username = os.getenv("ADMIN_USERNAME")
+    admin_email = os.getenv("ADMIN_EMAIL")
+    admin_password = os.getenv("ADMIN_PASSWORD")
+    
+    if not all([admin_username, admin_email, admin_password]):
+        logger.info("Admin credentials not provided in environment variables")
+        return
+    
+    # Check if any users exist
+    conn = db.get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) as count FROM users")
+    user_count = cursor.fetchone()['count']
+    conn.close()
+    
+    if user_count > 0:
+        logger.info("Users already exist, skipping admin creation from environment")
+        return
+    
+    # Create admin user
+    user_id = db.create_user(admin_username, admin_email, admin_password, is_admin=True)
+    
+    if user_id:
+        logger.info(f"✅ Admin user created from environment variables: {admin_username}")
+    else:
+        logger.error("❌ Failed to create admin user from environment variables")
+
 if __name__ == "__main__":
     logger.info("🚀 LMArena Bridge Dashboard Server starting...")
     logger.info("   - Dashboard URL: http://127.0.0.1:5105")
     logger.info("   - API docs: http://127.0.0.1:5105/docs")
+    
+    # Try to create admin user from environment variables
+    create_admin_from_env()
     
     uvicorn.run(app, host="0.0.0.0", port=5105)
