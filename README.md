@@ -21,7 +21,7 @@ This refactored version aims to provide a more stable, maintainable, and extensi
 - **[Dashboard Guide](DASHBOARD_README.md)** - Complete guide for the web dashboard
 - **[Dashboard Token System](DASHBOARD_TOKEN_INTEGRATION.md)** - Token management and authentication
 - **[Quick Start Dashboard](QUICK_START_DASHBOARD.md)** - Get started with the dashboard quickly
-- **[Cloud Deployment](docs/CLOUD_DEPLOYMENT.md)** - Deploy to cloud platforms (Coming Soon)
+- **[Cloud Deployment](#-advanced-cloud-deployments-topics)** - Deploy on cloud servers with local workers as the executor
 - **[Worker Configuration](worker_config.jsonc)** - Configure cloud workers
 
 ## ✨ Key Features
