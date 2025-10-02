@@ -101,7 +101,7 @@ def verify_password(password: str, hashed: str) -> bool:
 
 def generate_api_key() -> str:
     """Generate a secure API key."""
-    return f"sk-lmarena-{secrets.token_urlsafe(32)}"
+    return f"sk-nunu-{secrets.token_urlsafe(32)}"
 
 def generate_session_token() -> str:
     """Generate a secure session token."""
