@@ -1,7 +1,7 @@
 {
-  "title": "🎉 LMArenaBridge 更新公告 🎉",
+  "title": "🎉 LMArenaBridge Update Announcement 🎉",
   "content": [
-    "这是个一次性公告。",
-    "附带图片时，在提示词末尾添加`--bypass`字符来构造一个虚假ai回答，从而绕过竞技场的图片外审"
+    "This is a one-time announcement.",
+    "When attaching images, add `--bypass` at the end of your prompt to construct a fake AI response and bypass the arena's image external review"
   ]
 }

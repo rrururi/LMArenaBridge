@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - LMArena Bridge Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md">
+        <!-- Logo/Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">🌉 LMArena Bridge</h1>
+            <p class="text-gray-600">Dashboard Login</p>
+        </div>
+
+        <!-- Alert Messages -->
+        <div id="alert" class="hidden mb-4 p-4 rounded-lg"></div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                    Username
+                </label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
+                    placeholder="Enter your username"
+                >
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                    Password
+                </label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
+                    placeholder="Enter your password"
+                >
+            </div>
+
+            <button 
+                type="submit"
+                class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg transition duration-200 transform hover:scale-105"
+            >
+                Sign In
+            </button>
+        </form>
+
+        <!-- Register Link -->
+        <div class="mt-6 text-center">
+            <p class="text-gray-600">
+                Don't have an account? 
+                <a href="#" id="showRegister" class="text-purple-600 hover:text-purple-700 font-semibold">
+                    Register here
+                </a>
+            </p>
+        </div>
+
+        <!-- First Time Setup Note -->
+        <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p class="text-sm text-blue-800">
+                <strong>First time setup?</strong> Use the initial admin creation endpoint:
+                <code class="block mt-2 p-2 bg-white rounded text-xs">
+                    POST /api/admin/init
+                </code>
+            </p>
+        </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div id="registerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Create Account</h2>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+
+            <div id="registerAlert" class="hidden mb-4 p-4 rounded-lg"></div>
+
+            <form id="registerForm" class="space-y-4">
+                <div>
+                    <label for="reg_username" class="block text-sm font-medium text-gray-700 mb-2">
+                        Username
+                    </label>
+                    <input 
+                        type="text" 
+                        id="reg_username" 
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                        placeholder="Choose a username"
+                    >
+                </div>
+
+                <div>
+                    <label for="reg_email" class="block text-sm font-medium text-gray-700 mb-2">
+                        Email
+                    </label>
+                    <input 
+                        type="email" 
+                        id="reg_email" 
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                        placeholder="your.email@example.com"
+                    >
+                </div>
+
+                <div>
+                    <label for="reg_password" class="block text-sm font-medium text-gray-700 mb-2">
+                        Password
+                    </label>
+                    <input 
+                        type="password" 
+                        id="reg_password" 
+                        required
+                        minlength="6"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                        placeholder="At least 6 characters"
+                    >
+                </div>
+
+                <button 
+                    type="submit"
+                    class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg transition duration-200"
+                >
+                    Create Account
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Show alert function
+        function showAlert(message, type = 'error') {
+            const alert = document.getElementById('alert');
+            alert.className = `mb-4 p-4 rounded-lg ${
+                type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 
+                'bg-red-100 text-red-800 border border-red-200'
+            }`;
+            alert.textContent = message;
+            alert.classList.remove('hidden');
+            
+            setTimeout(() => {
+                alert.classList.add('hidden');
+            }, 5000);
+        }
+
+        function showRegisterAlert(message, type = 'error') {
+            const alert = document.getElementById('registerAlert');
+            alert.className = `mb-4 p-4 rounded-lg ${
+                type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 
+                'bg-red-100 text-red-800 border border-red-200'
+            }`;
+            alert.textContent = message;
+            alert.classList.remove('hidden');
+        }
+
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('Login successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 1000);
+                } else {
+                    showAlert(data.detail || 'Login failed');
+                }
+            } catch (error) {
+                showAlert('Connection error. Please try again.');
+                console.error('Login error:', error);
+            }
+        });
+
+        // Show/hide registration modal
+        document.getElementById('showRegister').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('registerModal').classList.remove('hidden');
+        });
+
+        document.getElementById('closeModal').addEventListener('click', () => {
+            document.getElementById('registerModal').classList.add('hidden');
+        });
+
+        // Registration form submission
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('reg_username').value;
+            const email = document.getElementById('reg_email').value;
+            const password = document.getElementById('reg_password').value;
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showRegisterAlert('Account created successfully! You can now login.', 'success');
+                    setTimeout(() => {
+                        document.getElementById('registerModal').classList.add('hidden');
+                        document.getElementById('username').value = username;
+                    }, 2000);
+                } else {
+                    showRegisterAlert(data.detail || 'Registration failed');
+                }
+            } catch (error) {
+                showRegisterAlert('Connection error. Please try again.');
+                console.error('Registration error:', error);
+            }
+        });
+
+        // Close modal on outside click
+        document.getElementById('registerModal').addEventListener('click', (e) => {
+            if (e.target.id === 'registerModal') {
+                document.getElementById('registerModal').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

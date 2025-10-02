@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - LMArena Bridge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-purple-600">🌉 LMArena Bridge</h1>
+                    <div class="ml-10 flex space-x-4">
+                        <a href="/dashboard" class="px-3 py-2 rounded-md text-sm font-medium text-purple-600 bg-purple-50">Dashboard</a>
+                        <a href="/tokens" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-purple-600 hover:bg-purple-50">Tokens</a>
+                        <a href="/analytics" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-purple-600 hover:bg-purple-50">Analytics</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="username" class="text-sm text-gray-700"></span>
+                    <button id="logoutBtn" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Section -->
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900">Dashboard</h2>
+            <p class="mt-2 text-gray-600">Overview of your API usage and system status</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Requests Card -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Requests</p>
+                        <p id="totalRequests" class="text-2xl font-semibold text-gray-900">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Tokens Card -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Active Tokens</p>
+                        <p id="activeTokens" class="text-2xl font-semibold text-gray-900">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Avg Response Time Card -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Avg Response</p>
+                        <p id="avgResponse" class="text-2xl font-semibold text-gray-900">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status Card -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">System Status</p>
+                        <p id="systemStatus" class="text-2xl font-semibold text-green-600">Online</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Requests Chart -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Requests Over Time (Last 7 Days)</h3>
+                <canvas id="requestsChart" height="200"></canvas>
+            </div>
+
+            <!-- Models Chart -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Models Used</h3>
+                <canvas id="modelsChart" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
+            </div>
+            <div class="p-6">
+                <div id="recentActivity" class="space-y-4">
+                    <p class="text-gray-500 text-center py-8">Loading recent activity...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <a href="/tokens" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition transform hover:-translate-y-1">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-purple-100 rounded-md p-3">
+                        <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-lg font-semibold text-gray-900">Create New Token</p>
+                        <p class="text-sm text-gray-600">Generate API access token</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="/analytics" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition transform hover:-translate-y-1">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-100 rounded-md p-3">
+                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-lg font-semibold text-gray-900">View Analytics</p>
+                        <p class="text-sm text-gray-600">Detailed usage statistics</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="http://127.0.0.1:5105/docs" target="_blank" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition transform hover:-translate-y-1">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-green-100 rounded-md p-3">
+                        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-lg font-semibold text-gray-900">API Documentation</p>
+                        <p class="text-sm text-gray-600">View API endpoints</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+    <script>
+        // Load user info
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/api/auth/me', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    window.location.href = '/';
+                    return;
+                }
+                
+                const user = await response.json();
+                document.getElementById('username').textContent = user.username;
+            } catch (error) {
+                window.location.href = '/';
+            }
+        }
+
+        // Load statistics
+        async function loadStats() {
+            try {
+                const [usageResponse, tokensResponse, statusResponse] = await Promise.all([
+                    fetch('/api/usage/summary?days=30', { credentials: 'include' }),
+                    fetch('/api/tokens', { credentials: 'include' }),
+                    fetch('/api/status')
+                ]);
+
+                if (usageResponse.ok) {
+                    const usage = await usageResponse.json();
+                    document.getElementById('totalRequests').textContent = usage.total_requests.toLocaleString();
+                    document.getElementById('avgResponse').textContent = `${usage.avg_response_time_ms}ms`;
+                    
+                    // Update charts
+                    updateRequestsChart(usage.by_day);
+                    updateModelsChart(usage.by_model);
+                }
+
+                if (tokensResponse.ok) {
+                    const tokens = await tokensResponse.json();
+                    const activeCount = tokens.tokens.filter(t => t.is_active).length;
+                    document.getElementById('activeTokens').textContent = activeCount;
+                }
+
+                if (statusResponse.ok) {
+                    const status = await statusResponse.json();
+                    document.getElementById('systemStatus').textContent = status.dashboard_server === 'online' ? 'Online' : 'Offline';
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Load recent activity
+        async function loadRecentActivity() {
+            try {
+                const response = await fetch('/api/usage/logs?limit=5', { credentials: 'include' });
+                if (!response.ok) return;
+
+                const data = await response.json();
+                const container = document.getElementById('recentActivity');
+                
+                if (data.logs.length === 0) {
+                    container.innerHTML = '<p class="text-gray-500 text-center py-8">No recent activity</p>';
+                    return;
+                }
+
+                container.innerHTML = data.logs.map(log => `
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-900">${log.model_name || 'Unknown Model'}</p>
+                            <p class="text-sm text-gray-600">${log.endpoint} • ${log.token_name}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-medium ${log.status_code === 200 ? 'text-green-600' : 'text-red-600'}">
+                                ${log.status_code}
+                            </p>
+                            <p class="text-xs text-gray-500">${log.response_time_ms}ms</p>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading recent activity:', error);
+            }
+        }
+    </script>
+</body>
+</html>

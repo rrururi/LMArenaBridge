@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Tokens - LMArena Bridge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-purple-600">🌉 LMArena Bridge</h1>
+                    <div class="ml-10 flex space-x-4">
+                        <a href="/dashboard" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-purple-600 hover:bg-purple-50">Dashboard</a>
+                        <a href="/tokens" class="px-3 py-2 rounded-md text-sm font-medium text-purple-600 bg-purple-50">Tokens</a>
+                        <a href="/analytics" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-purple-600 hover:bg-purple-50">Analytics</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="username" class="text-sm text-gray-700"></span>
+                    <button id="logoutBtn" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="mb-8 flex justify-between items-center">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900">API Tokens</h2>
+                <p class="mt-2 text-gray-600">Manage your API access tokens</p>
+            </div>
+            <button id="createTokenBtn" class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition transform hover:scale-105">
+                + Create New Token
+            </button>
+        </div>
+
+        <!-- Alert Messages -->
+        <div id="alert" class="hidden mb-6 p-4 rounded-lg"></div>
+
+        <!-- Tokens List -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Your Tokens</h3>
+            </div>
+            <div id="tokensList" class="p-6">
+                <p class="text-gray-500 text-center py-8">Loading tokens...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Token Modal -->
+    <div id="createTokenModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Create New Token</h2>
+                <button id="closeCreateModal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+
+            <form id="createTokenForm" class="space-y-4">
+                <div>
+                    <label for="tokenName" class="block text-sm font-medium text-gray-700 mb-2">
+                        Token Name
+                    </label>
+                    <input 
+                        type="text" 
+                        id="tokenName" 
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                        placeholder="e.g., Production API, Development"
+                    >
+                </div>
+
+                <div>
+                    <label for="expiresDays" class="block text-sm font-medium text-gray-700 mb-2">
+                        Expires In (days)
+                    </label>
+                    <input 
+                        type="number" 
+                        id="expiresDays" 
+                        min="1"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                        placeholder="Leave empty for no expiration"
+                    >
+                    <p class="mt-1 text-xs text-gray-500">Leave empty for tokens that never expire</p>
+                </div>
+
+                <button 
+                    type="submit"
+                    class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg transition duration-200"
+                >
+                    Create Token
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Token Display Modal -->
+    <div id="tokenDisplayModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-2xl p-8 w-full max-w-lg">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Token Created Successfully!</h2>
+                <p class="text-red-600 text-sm font-medium">⚠️ Copy this token now - it won't be shown again!</p>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Your New Token</label>
+                <div class="flex gap-2">
+                    <input 
+                        type="text" 
+                        id="newTokenDisplay" 
+                        readonly
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm"
+                    >
+                    <button 
+                        id="copyTokenBtn"
+                        class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition"
+                    >
+                        Copy
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p class="text-sm text-blue-800">
+                    <strong>Usage:</strong> Include this token in your API requests using the Authorization header:
+                </p>
+                <code class="block mt-2 p-2 bg-white rounded text-xs break-all">
+                    Authorization: Bearer YOUR_TOKEN_HERE
+                </code>
+            </div>
+
+            <button 
+                id="closeTokenDisplay"
+                class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 rounded-lg transition"
+            >
+                I've Copied My Token
+            </button>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div id="deleteConfirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Revoke Token?</h2>
+            <p class="text-gray-600 mb-6">This action cannot be undone. Any applications using this token will lose access immediately.</p>
+            
+            <div class="flex gap-4">
+                <button 
+                    id="cancelDelete"
+                    class="flex-1 px-4 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg transition"
+                >
+                    Cancel
+                </button>
+                <button 
+                    id="confirmDelete"
+                    class="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition"
+                >
+                    Revoke Token
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tokenToDelete = null;
+
+        // Show alert function
+        function showAlert(message, type = 'error') {
+            const alert = document.getElementById('alert');
+            alert.className = `mb-6 p-4 rounded-lg ${
+                type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 
+                'bg-red-100 text-red-800 border border-red-200'
+            }`;
+            alert.textContent = message;
+            alert.classList.remove('hidden');
+            
+            setTimeout(() => {
+                alert.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Load user info and check auth
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/api/auth/me', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    window.location.href = '/';
+                    return;
+                }
+                
+                const user = await response.json();
+                document.getElementById('username').textContent = user.username;
+            } catch (error) {
+                window.location.href = '/';
+            }
+        }
+
+        // Load tokens
+        async function loadTokens() {
+            try {
+                const response = await fetch('/api/tokens', {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load tokens');
+                }
+
+                const data = await response.json();
+                const container = document.getElementById('tokensList');
+
+                if (data.tokens.length === 0) {
+                    container.innerHTML = '<p class="text-gray-500 text-center py-8">No tokens yet. Create your first token to get started!</p>';
+                    return;
+                }
+
+                container.innerHTML = data.tokens.map(token => {
+                    const createdDate = new Date(token.created_at).toLocaleDateString();
+                    const lastUsed = token.last_used_at ? new Date(token.last_used_at).toLocaleDateString() : 'Never';
+                    const expiresAt = token.expires_at ? new Date(token.expires_at).toLocaleDateString() : 'Never';
+                    const isExpired = token.expires_at && new Date(token.expires_at) < new Date();
+                    const statusBadge = token.is_active && !isExpired 
+                        ? '<span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded">Active</span>'
+                        : '<span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded">Inactive</span>';
+
+                    return `
+                        <div class="border-b border-gray-200 last:border-b-0 py-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h4 class="text-lg font-semibold text-gray-900">${token.token_name}</h4>
+                                        ${statusBadge}
+                                    </div>
+                                    <p class="text-sm text-gray-600 font-mono">${token.token_key.substring(0, 20)}...</p>
+                                </div>
+                                <button 
+                                    onclick="deleteToken(${token.id}, '${token.token_name}')"
+                                    class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition"
+                                >
+                                    Revoke
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4 mt-3 text-sm">
+                                <div>
+                                    <span class="text-gray-500">Created:</span>
+                                    <span class="text-gray-900 ml-1">${createdDate}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Last Used:</span>
+                                    <span class="text-gray-900 ml-1">${lastUsed}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Expires:</span>
+                                    <span class="text-gray-900 ml-1">${expiresAt}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading tokens:', error);
+                showAlert('Failed to load tokens');
+            }
+        }
+
+        // Create token
+        document.getElementById('createTokenForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const tokenName = document.getElementById('tokenName').value;
+            const expiresDays = document.getElementById('expiresDays').value;
+
+            try {
+                const response = await fetch('/api/tokens', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        token_name: tokenName,
+                        expires_days: expiresDays ? parseInt(expiresDays) : null
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('createTokenModal').classList.add('hidden');
+                    document.getElementById('createTokenForm').reset();
+                    
+                    // Show the new token
+                    document.getElementById('newTokenDisplay').value = data.token_key;
+                    document.getElementById('tokenDisplayModal').classList.remove('hidden');
+                    
+                    await loadTokens();
+                } else {
+                    showAlert(data.detail || 'Failed to create token');
+                }
+            } catch (error) {
+                showAlert('Connection error. Please try again.');
+                console.error('Create token error:', error);
+            }
+        });
+
+        // Delete token
+        function deleteToken(tokenId, tokenName) {
+            tokenToDelete = tokenId;
+            document.getElementById('deleteConfirmModal').classList.remove('hidden');
+        }
+
+        document.getElementById('confirmDelete').addEventListener('click', async () => {
+            if (!tokenToDelete) return;
+
+            try {
+                const response = await fetch(`/api/tokens/${tokenToDelete}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    showAlert('Token revoked successfully', 'success');
+                    await loadTokens();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.detail || 'Failed to revoke token');
+                }
+            } catch (error) {
+                showAlert('Connection error. Please try again.');
+                console.error('Delete token error:', error);
+            }
+
+            document.getElementById('deleteConfirmModal').classList.add('hidden');
+            tokenToDelete = null;
+        });
+
+        // Copy token to clipboard
+        document.getElementById('copyTokenBtn').addEventListener('click', () => {
+            const tokenInput = document.getElementById('newTokenDisplay');
+            tokenInput.select();
+            document.execCommand('copy');
+            
+            const btn = document.getElementById('copyTokenBtn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Copied!';
+            btn.classList.add('bg-green-600');
+            btn.classList.remove('bg-purple-600');
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.remove('bg-green-600');
+                btn.classList.add('bg-purple-600');
+            }, 2000);
+        });
+
+        // Logout handler
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.location.href = '/';
+            }
+        });
+
+        // Modal handlers
+        document.getElementById('createTokenBtn').addEventListener('click', () => {
+            document.getElementById('createTokenModal').classList.remove('hidden');
+        });
+
+        document.getElementById('closeCreateModal').addEventListener('click', () => {
+            document.getElementById('createTokenModal').classList.add('hidden');
+            document.getElementById('createTokenForm').reset();
+        });
+
+        document.getElementById('closeTokenDisplay').addEventListener('click', () => {
+            document.getElementById('tokenDisplayModal').classList.add('hidden');
+        });
+
+        document.getElementById('cancelDelete').addEventListener('click', () => {
+            document.getElementById('deleteConfirmModal').classList.add('hidden');
+            tokenToDelete = null;
+        });
+
+        // Close modals on outside click
+        document.getElementById('createTokenModal').addEventListener('click', (e) => {
+            if (e.target.id === 'createTokenModal') {
+                document.getElementById('createTokenModal').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('deleteConfirmModal').addEventListener('click', (e) => {
+            if (e.target.id === 'deleteConfirmModal') {
+                document.getElementById('deleteConfirmModal').classList.add('hidden');
+                tokenToDelete = null;
+            }
+        });
+
+        // Initialize page
+        async function initPage() {
+            await loadUserInfo();
+            await loadTokens();
+        }
+
+        // Start loading data when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            initPage();
+        }
+    </script>
+</body>
+</html>
