@@ -76,8 +76,14 @@
 
   // --- 安全设置 ---
 
+  // 使用 Dashboard Token 系统
+  // 启用后，将使用 dashboard 的多用户 token 系统进行身份验证和使用跟踪。
+  // 如果禁用，将回退到简单的 API Key 验证。
+  "use_dashboard_tokens": true,
+
   // API Key
   // 设置一个 API Key 来保护您的服务。
   // 如果设置了此值，所有到 /v1/chat/completions 的请求都必须在 Authorization 头部中包含正确的 Bearer Token。
+  // 注意：如果 use_dashboard_tokens 为 true，系统将优先使用 dashboard tokens，此 API Key 将作为备用选项。
   "api_key": ""
 }

@@ -25,6 +25,7 @@ from fastapi.responses import StreamingResponse, JSONResponse, Response
 
 # --- 内部模块导入 ---
 from modules.file_uploader import upload_to_file_bed
+from modules import dashboard_db as db
 
 
 # --- 基础配置 ---
@@ -1018,21 +1019,46 @@ async def chat_completions(request: Request):
 
     # 如果不是图像模型，则执行正常的文本生成逻辑
     load_config()  # 实时加载最新配置，确保会话ID等信息是最新的
-    # --- API Key 验证 ---
-    api_key = CONFIG.get("api_key")
-    if api_key:
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            raise HTTPException(
-                status_code=401,
-                detail="未提供 API Key。请在 Authorization 头部中以 'Bearer YOUR_KEY' 格式提供。"
-            )
-        
+    
+    # --- API Key / Token 验证 ---
+    request_start_time = time.time()  # 记录请求开始时间，用于后续日志记录
+    user_id = None
+    validated_token = None
+    
+    auth_header = request.headers.get('Authorization')
+    if auth_header and auth_header.startswith('Bearer '):
         provided_key = auth_header.split(' ')[1]
-        if provided_key != api_key:
+        
+        # 首先尝试使用 dashboard token 系统验证
+        if CONFIG.get("use_dashboard_tokens", True):
+            user_id = db.validate_api_token(provided_key)
+            if user_id:
+                validated_token = provided_key
+                logger.info(f"API CALL: Dashboard token 验证成功 (User ID: {user_id})")
+        
+        # 如果 dashboard token 验证失败，回退到简单 API key
+        if not user_id:
+            simple_api_key = CONFIG.get("api_key")
+            if simple_api_key:
+                if provided_key == simple_api_key:
+                    logger.info("API CALL: 简单 API Key 验证成功")
+                else:
+                    raise HTTPException(
+                        status_code=401,
+                        detail="提供的 API Key 或 Token 不正确。"
+                    )
+            else:
+                # 没有配置简单 API key，但 dashboard token 也无效
+                raise HTTPException(
+                    status_code=401,
+                    detail="提供的 Token 无效。请检查 Token 是否已过期或被撤销。"
+                )
+    else:
+        # 没有提供 Authorization header
+        if CONFIG.get("api_key") or CONFIG.get("use_dashboard_tokens", True):
             raise HTTPException(
                 status_code=401,
-                detail="提供的 API Key 不正确。"
+                detail="未提供认证信息。请在 Authorization 头部中以 'Bearer YOUR_TOKEN' 格式提供。"
             )
 
     # --- 增强的连接检查，解决人机验证后的竞态条件 ---
@@ -1172,14 +1198,75 @@ async def chat_completions(request: Request):
         is_stream = openai_req.get("stream", False)
 
         if is_stream:
-            # 返回流式响应
+            # 返回流式响应 - 包装为可记录使用日志的生成器
+            async def logged_stream_generator():
+                response_completed = False
+                status_code = 200
+                error_msg = None
+                
+                try:
+                    async for chunk in stream_generator(request_id, model_name or "default_model"):
+                        yield chunk
+                    response_completed = True
+                except Exception as e:
+                    status_code = 500
+                    error_msg = str(e)
+                    raise
+                finally:
+                    # 记录使用日志（如果使用了 dashboard token）
+                    if validated_token and response_completed:
+                        response_time_ms = int((time.time() - request_start_time) * 1000)
+                        try:
+                            db.log_request(
+                                token_key=validated_token,
+                                model_name=model_name or "unknown",
+                                endpoint="/v1/chat/completions",
+                                response_time_ms=response_time_ms,
+                                status_code=status_code,
+                                tokens_used=0,
+                                error_message=error_msg
+                            )
+                            logger.info(f"API CALL [ID: {request_id[:8]}]: 使用日志已记录 (响应时间: {response_time_ms}ms)")
+                        except Exception as log_error:
+                            logger.error(f"记录使用日志失败: {log_error}")
+            
             return StreamingResponse(
-                stream_generator(request_id, model_name or "default_model"),
+                logged_stream_generator(),
                 media_type="text/event-stream"
             )
         else:
             # 返回非流式响应
-            return await non_stream_response(request_id, model_name or "default_model")
+            response = await non_stream_response(request_id, model_name or "default_model")
+            
+            # 记录使用日志（如果使用了 dashboard token）
+            if validated_token:
+                response_time_ms = int((time.time() - request_start_time) * 1000)
+                status_code = response.status_code if hasattr(response, 'status_code') else 200
+                error_msg = None
+                
+                # 检查是否是错误响应
+                if status_code >= 400:
+                    try:
+                        error_data = json.loads(response.body)
+                        error_msg = error_data.get("error", {}).get("message")
+                    except:
+                        pass
+                
+                try:
+                    db.log_request(
+                        token_key=validated_token,
+                        model_name=model_name or "unknown",
+                        endpoint="/v1/chat/completions",
+                        response_time_ms=response_time_ms,
+                        status_code=status_code,
+                        tokens_used=0,
+                        error_message=error_msg
+                    )
+                    logger.info(f"API CALL [ID: {request_id[:8]}]: 使用日志已记录 (响应时间: {response_time_ms}ms)")
+                except Exception as log_error:
+                    logger.error(f"记录使用日志失败: {log_error}")
+            
+            return response
     except (ValueError, IOError) as e:
         # 捕获附件处理错误
         logger.error(f"API CALL [ID: {request_id[:8]}]: 附件预处理失败: {e}")
