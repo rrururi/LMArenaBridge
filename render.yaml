@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: lmarena-bridge
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: API_SERVER_URL
+        value: http://127.0.0.1:5102
+      - key: DASHBOARD_SERVER_URL
+        value: http://127.0.0.1:5105
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    healthCheckPath: /health
