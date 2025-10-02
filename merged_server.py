@@ -25,9 +25,12 @@ from contextlib import asynccontextmanager
 import uvicorn
 import requests
 from packaging.version import parse as parse_version
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, HTTPException, Depends, Cookie, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse, JSONResponse, Response
+from fastapi.responses import StreamingResponse, JSONResponse, Response as FastAPIResponse, HTMLResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, EmailStr
+from typing import Optional, List
 
 # --- 内部模块导入 ---
 from modules.file_uploader import upload_to_file_bed
